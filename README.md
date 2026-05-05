@@ -10,11 +10,11 @@
 # 進入項目目錄
 cd /workspaces/garbage
 
-# 啟動本地伺服器
-python3 -m http.server 8080
+# 使用 GitHub Pages 或靜態站點託管 (無需後端)
+# 例如：將檔案推送到 GitHub 並啟用 Pages
 ```
 
-訪問: http://localhost:8080
+訪問: https://<你的用戶名>.github.io/garbage/
 
 ### GitHub Pages 部署
 
