@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>垃圾分類識別 - Glass/Trash/Paper</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>♻️ 垃圾分類識別器</h1>
+            <p class="subtitle">識別玻璃、垃圾和紙張</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 模型加載狀態 -->
+            <div id="loadingPanel" class="loading-panel">
+                <div class="spinner"></div>
+                <p>正在加載模型...</p>
+            </div>
+
+            <!-- 標籤頁面 -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('camera')">
+                    📷 攝像頭
+                </button>
+                <button class="tab-button" onclick="switchTab('upload')">
+                    📁 上傳圖片
+                </button>
+                <button class="tab-button" onclick="switchTab('info')">
+                    ℹ️ 幫助
+                </button>
+            </div>
+
+            <!-- 攝像頭標籤 -->
+            <div id="cameraTab" class="tab-content active">
+                <div class="camera-section">
+                    <div class="video-wrapper">
+                        <video id="videoElement" autoplay playsinline></video>
+                        <canvas id="captureCanvas" style="display: none;"></canvas>
+                    </div>
+                    <div class="controls">
+                        <button id="startBtn" class="btn btn-primary" onclick="startCamera()">
+                            🎥 啟動攝像頭
+                        </button>
+                        <button id="stopBtn" class="btn btn-secondary" onclick="stopCamera()" style="display: none;">
+                            ⏹️ 停止攝像頭
+                        </button>
+                    </div>
+                    
+                    <div id="cameraResult" class="result-section" style="display: none;">
+                        <h3>識別結果</h3>
+                        <div id="resultContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上傳標籤 -->
+            <div id="uploadTab" class="tab-content">
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📸</div>
+                        <p>拖拽圖片到此或點擊上傳</p>
+                        <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)" style="display: none;">
+                    </div>
+                    
+                    <div id="uploadPreview" class="preview-section" style="display: none;">
+                        <img id="previewImage" src="" alt="預覽">
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="classifyUploadedImage()">
+                                🔍 開始分類
+                            </button>
+                            <button class="btn btn-secondary" onclick="resetUpload()">
+                                🔄 選擇新圖片
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="uploadResult" class="result-section" style="display: none;">
+                        <h3>識別結果</h3>
+                        <div id="uploadResultContent"></div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="resetUpload()">
+                                📁 上傳新圖片
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 幫助標籤 -->
+            <div id="infoTab" class="tab-content">
+                <div class="info-section">
+                    <h3>🎯 如何使用</h3>
+                    <div class="info-content">
+                        <div class="info-item">
+                            <h4>📷 攝像頭識別</h4>
+                            <p>1. 點擊「啟動攝像頭」按鈕</p>
+                            <p>2. 將垃圾對準攝像頭</p>
+                            <p>3. 應用程式會自動識別並分類垃圾</p>
+                        </div>
+                        
+                        <div class="info-item">
+                            <h4>📁 上傳圖片</h4>
+                            <p>1. 切換到「上傳圖片」標籤</p>
+                            <p>2. 拖拽或點擊上傳垃圾的照片</p>
+                            <p>3. 點擊「開始分類」按鈕</p>
+                            <p>4. 查看分類結果</p>
+                        </div>
+
+                        <div class="info-item">
+                            <h4>🏷️ 垃圾分類</h4>
+                            <ul>
+                                <li><strong>🔵 玻璃 (Glass)</strong> - 玻璃瓶、玻璃杯等</li>
+                                <li><strong>🟫 垃圾 (Trash)</strong> - 一般廢棄物</li>
+                                <li><strong>📄 紙張 (Paper)</strong> - 紙盒、紙張等</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-item">
+                            <h4>⚠️ 注意事項</h4>
+                            <ul>
+                                <li>確保光線充足</li>
+                                <li>物體應清晰可見於鏡頭</li>
+                                <li>一次只識別單個物體效果最好</li>
+                                <li>此應用完全在瀏覽器本地運行，無需上傳數據</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>🌍 完全本地運行 • 隱私保護 • 使用 TensorFlow.js</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
